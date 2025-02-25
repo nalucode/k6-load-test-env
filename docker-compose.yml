@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  k6:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./tests:/tests
+    working_dir: /tests
+    command: run example.js  # Substitua pelo nome do seu script
+    ports:
+      - "6565:6565"
+    environment:
+      - K6_OUT=xk6-prometheus-rw
+      - K6_PROMETHEUS_RW_SERVER_URL=http://prometheus:9090/api/v1/write
+    depends_on:
+      - prometheus
+
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--web.enable-remote-write-receiver"
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning
+    depends_on:
+      - prometheus
+
+volumes:
+  grafana-data:
+  prometheus-data:

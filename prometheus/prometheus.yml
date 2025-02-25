@@ -1,0 +1,8 @@
+global:
+  scrape_interval: 15s
+
+# Opcional: scrape do k6 na porta 6565, se desejar
+scrape_configs:
+  - job_name: 'k6'
+    static_configs:
+      - targets: ['k6:6565']
